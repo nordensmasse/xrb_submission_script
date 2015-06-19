@@ -1,0 +1,24 @@
+
+! inlist_test_rlo
+
+
+
+&star_job
+
+
+
+/ ! end of star_job namelist
+
+
+
+&controls
+
+
+/ ! end of controls namelist
+
+
+&pgstar
+         
+ 
+
+/ ! end of pgstar namelist

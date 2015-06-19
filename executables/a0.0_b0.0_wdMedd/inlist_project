@@ -1,0 +1,49 @@
+&binary_job
+
+   inlist_names(1) = 'inlist1' 
+   inlist_names(2) = 'inlist2'
+
+   !which_for_pgstar = 0 ! 0 means none; < 0 means all; i > 0 means star i
+   evolve_both_stars = .false.
+   trace_binary_rlo = .false.
+
+
+/ ! end of binary_job namelist
+
+&binary_controls
+   ! donor mass in Msun    
+   m1 
+   ! companion mass in Msun 
+   m2 
+   ! Initial period in days
+   initial_period_in_days 
+
+   mdot_scheme = "Ritter"
+   !fm = 0.005d0 !default is 0.01d0 (initial runs)
+   !fr = 0.01d0 !default is 0.01d0 (initial runs)
+
+   !upper_limit_on_period_in_hours = 8760 !one year
+!   accretor_overflow_terminate = 0.1d0
+   max_abs_mdot = 1d10 ! this was set to 1d-3 in the initial runs
+
+   implicit_scheme_tolerance = 1d-3 ! Use the explicit scheme
+   max_tries_to_achieve = 100 ! Use the explicit scheme
+
+
+   !transfer efficiency controls
+   mass_transfer_alpha = 0.0d0
+   mass_transfer_beta  = 0.0d0
+   mass_transfer_delta = 0.0d0
+   mass_transfer_gamma = 0.0d0
+
+   use_this_for_mdot_edd = -1 !Msun/yr (approximately 100 times the M_dot_Edd for a NS)
+   limit_retention_by_mdot_edd = .true.
+
+   photostep = -1
+
+
+         
+
+   !jdot_multiplier = 0d0 ! We set this initially to 0, but as soon as MT starts, it is set back to 1. Look for "tassos" in file 
+/ ! end of binary_controls namelist
+

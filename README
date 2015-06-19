@@ -1,0 +1,179 @@
+Prepared by Mads Sørensen
+
+The following document introduces the submission script relevant to investigate XRB systems using MESA.
+The guide is intended to help with generating and submitting a job list on a computer cluster.
+When a new simulation is needed, one simply redo this guide with the appropriate changes to a new set of simulations.
+
+The overall doing of the scripts:
+For a set of initial parameters of orbital period P, donor mass M2, and accretor Mbh, 
+at the onset of Roche Lobe Overflow (RLO) the script evaluate if the given parameters lead 
+to a potential solution in the orbital evolution of the system considered.
+
+The evaluations considers the radius of M2 at RLO onset. It then evaluates mass transfer 
+given some efficiency alpha and beta which are the fraction of mass lost from the donor 
+and from the accretor respectively. The mass lost at the donor carries with it the specific
+angular momentum of the donor. likewise for mass lost from the accretor this carries with it the specific
+angular momentum of the accretor. 
+The mass transfer is done under the fiducial test and consists of a simple Lagrangian point mass binary model.
+
+******************************************************************************************
+SHORT VERSION:
+1) Adjust the relevant inlist files in the MESA project folder.
+2) Adjust all paths in SetupScriptsFile.py
+3) Generate job list:
+$ python GenerateJobList_ncpu.py ncpus SetupScriptsPathsFile alpha beta system > ~/.../main_folder/other_data/a"alpha"_b"beta"_"other"_JobList_1.txt
+4) Adjust SubmitJobList.py to the relevant queue management system
+5) Submit job list
+$ python SubmitJobList.py "number of jobs to submit" "path to SetupScriptPathsFile"
+
+******************************************************************************************
+LOOOOONG VERSION
+
+Content:
+1) Folder structure
+2) How to submit a job
+
+------------------------------------------------------------------------------------------
+1] Folder structure
+Keep the folder structure locally and on the cluster for easier management. 
+Job lists are most convenient created locally, especially for large lists.
+Be modest and create initially a small list.
+
+1) Underneath a main folder you need the following folders:
+I.E: ~/.../main_folder/
+	a) /executables
+	b) /MTgrids
+	c) /other_data
+	d) /scripts
+	e) /SINGLEgrids
+	f) /systems
+
+a) executables:
+Contains the MESA project folders required for each simulation. The examples shown reveal some MESA projects.
+In other words, the executables contains the initial conditions of each simulation.
+
+b) MTgrids:
+Contains the raw data produced from your simulations on which you will perform your data analysis.
+
+c) other_data:
+Primarily used to save the different job lists generated each time a simulation is submitted.
+
+d) scripts:
+Contains all relevant functions and programs to setup a job list and submit this list to a cluster.
+
+e) SINGLEgrids:
+Contains data on single stars of specific initial conditions, primarily metallicity and mass. 
+Before a job list  can be created you need to have the single grids ready.
+For systematics make the subfolders of SINGLEgrids to be: /SINGLEgrids/Z"value"/"mass_of_star"/
+e.g. 
+SINGLEgrids/Z0.02/1.0/
+would contain a single star of mass 1 solar mass with a solar neighbourhood metallicity Z=0.02. 
+Stack stars of equal metallicity within the same folder.
+
+f) systems:
+This folder contains a simple .dat file with relevant observational parameters of the system. 
+The file is divided into three columns which contain:
+I) parameter name
+II) parameter value
+III) 1-sigma error on parameter value
+
+
+------------------------------------------------------------------------------------------
+2] How to submit a job--------------------------------------------------------------------
+This part explains the steps needed to generate and submit a job list.
+
+2.1 First things first...
+2.2 preparing folder MTgrids
+2.3 Preparing folder executables
+2.4 Generating a job list
+2.5 Queue Management script
+2.6 The SetupScriptsPathsFile.py
+2.7 Submitting a job list
+
+2.1] First things first...----------------------------------------------------------------
+Before continuing make sure the following things are handled:
+
+a) A grid of single stars has been simulated and copied to a location as described 
+under section 1]e) above.
+
+b) A data file containing observational values which you have available.
+For the generation of a job list in the current version the following parameters are needed:
+P: Orbital period in days.
+M2: Mass of donor star in solar masses
+Mbh: Mass of accreting compact object, e.g. black hole, in solar masses
+Aspin: Kerr spin of black hole in units of c.
+
+It is possible to remove one or more of these dependencies when generating a job list, 
+but it also removes the need for this feature.
+
+
+2.2] Preparing folder MTgrids-------------------------------------------------------------
+-- Relevant for cluster --
+Under MTgrids create a folder named like a"value_of_alpha"_b"value_of_beta", e.g.
+a0.25_b0.50/ This folder contains mass transfer sequences all with alpha = 0.25 and beta = 0.50.
+Under this folder the file "SetupScriptPaths.py" shall be found.
+An example of this file is found under the folder  scripts/
+It is also good practice to add to the folder name other extensions to indicate if there 
+are other special things included into the simulations, e.g. Eddington Luminosity or no overshooting etc.
+
+2.3] Preparing folder executables---------------------------------------------------------
+-- Relevant for cluster --
+A copy of a MESA project shall be put in here. For the job list we are interested in the alpha and beta mass transfer efficiencies.
+Within the relevant MESA inlist file change alpha and beta to match the folder made under MTgrids/. 
+Remember to also adjust for any other relevant inlist parameters needed.
+
+2.4] Generating a job list----------------------------------------------------------------
+Go to the folder scripts/ and open GenerateJobList_ncpu.py.
+GenerateJobList_ncpu.py is written in python 2.7 using the anaconda distribution. 
+It also requires the use of the ODE solver package ODESPY.
+Generate the job list locally and not on the cluster. 
+For a long list it can be relative time consuming wrt the work environment of the cluster.
+
+In lines 43 to 45, one has the initial values at RLOF onset of orbital period, donor mass and black hole mass.
+
+These can be changed to fit the desired needs. Make sure that M2 has a match within the SINGLEgrid folder.
+
+Lines 35-39 is the command line input when executing the program.
+	ncpus 			= int(sys.argv[1])   	: Is the number of cpus/cores to use.
+	SetupScriptPathsFile 	= sys.argv[2] 		: Path to file SetupScriptPathsFile, see MTgrids.
+	alpha 			= float(sys.argv[3]) 	: Fraction of mass lost from donor.
+	beta 			= float(sys.argv[4])	: Fraction of mass lost from accretor
+	system 			= sys.argv[5] 		: name of system.dat file, i.e. "LMC_X-3.dat"
+
+To execute the generate job list file the command is:
+***
+$ python GenerateJobList_ncpu.py ncpus SetupScriptsPathsFile alpha beta system
+***
+The program is set to simply write out to the screen.
+To print to a file add to the execution commmand:
+***
+$ python GenerateJobList_ncpu.py ncpus SetupScriptsPathsFile alpha beta system > ~/.../main_folder/other_data/a0.0_b0.25_wdMedd_JobList_1.txt
+***
+
+Feel free to change the name of the text file but output it under other_data/. but remember to adjust the SetupSciptsPathsFile.py.
+
+2.5] Queue management script—-------------------------------------------------------------
+-- Relevant for cluster -- 
+A script file adopted to the queue management system on the cluster shall be created and stored under other_data/
+See the example baobab_shared.slurm which is for the SLURM system. Northwestern does not use SLURM. So this file needs to be edited significantly.
+
+2.6] The SetupScriptsPathsFile.py---------------------------------------------------------
+Adjust all relevant lines in the file so the paths point to the correct files.
+It shall be done whenever a new batch of simulations is prepared for submission.
+Make sure all file names etc. are changed when necessary.
+
+2.7] Submitting a job list----------------------------------------------------------------
+-- Relevant for cluster --
+Unfortunately, when submitting a job list, the lists lines are deleted once they are submitted. Make sure to keep a copy of the job list locally.
+
+Under scripts/ open SubmitJoblist.py.
+Adjust relevant parameters to fit the choosen computer cluster and its queue management system. The present version is set up with SLURM.
+
+To execute SubmitJobList.py do the following:
+Logon to the cluster where the same folder structure as described in this document is available.
+Copy the generated job list to the other_data/ folder.
+Execute the command below.
+***
+$ python SubmitJobList.py "number of jobs to submit" "path to SetupScriptPathsFile"
+***
+
