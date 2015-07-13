@@ -13,6 +13,7 @@ def log_result(result):
 def Add2JobList(SetupScriptPathsFile, alpha, beta, system, M2, Mbh, P):
 	#execfile(SetupScriptPathsFile,globals())
 	SingleTrackFile = SingleGridsDir+'/'+str(M2)+'/LOGS/history.data'
+	dum = ""
 	if os.path.isfile(SingleTrackFile):
 		model_number, star_age, star_mass, log10_R = numpy.loadtxt(SingleTrackFile,skiprows=6,usecols=(0,1,2,37),unpack=True)
 		StarRadius = 10.**log10_R * u.Rsun
