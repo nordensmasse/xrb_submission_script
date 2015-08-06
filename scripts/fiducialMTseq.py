@@ -109,10 +109,9 @@ def LagrangianMTseq(alpha, beta, M20, Mbh, P, system):
 	F_M1       = 0
 	F_spin 	   = 0
 	
-	M2_cal = numpy.linspace(M20, M2low, 2001)
-	M1_cal = -(1-alpha)*(1-beta)*(M2low-M20)+Mbh
-	p = evolve_orbital_period_RLO(alpha, beta, P0, M10, M20, M2_cal)
-	P_cal      	= p
+	M2_cal 	= numpy.linspace(M20, M2low, 2001)
+	M1_cal 	= -(1-alpha)*(1-beta)*(M2_cal-M20)+Mbh
+	P_cal 	= evolve_orbital_period_RLO(alpha, beta, P, Mbh, M20, M2_cal)
 
 	# Criteria for interpolation
 	# Avoid extrapolation
