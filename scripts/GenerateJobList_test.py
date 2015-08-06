@@ -11,32 +11,21 @@ def log_result(result):
     result_list.append(result)
 
 def Add2JobList(SetupScriptPathsFile, alpha, beta, system, M2, Mbh, P):
-	#execfile(SetupScriptPathsFile,globals())
-	SingleTrackFile = SingleGridsDir+'/'+str(M2)+'/LOGS/history.data'
+	
 	dum = ""
-	if os.path.isfile(SingleTrackFile):
-		model_number, star_age, star_mass, log10_R = numpy.loadtxt(SingleTrackFile,skiprows=6,usecols=(0,1,2,37),unpack=True)
-		StarRadius = 10.**log10_R * u.Rsun
-		fiducial = fiducialMTseq.LagrangianMTseq(alpha, beta, M2, Mbh, P, system)
-		if fiducial != 1:
-			return dum
-		RLORadius = roche_lobe(star_mass*u.Msun,float(Mbh)*u.Msun)*period_to_separation(float(P)*u.day,star_mass*u.Msun,float(Mbh)*u.Msun)
-		if (RLORadius < StarRadius).any() and (RLORadius[0] > StarRadius[0]):
-			JobDir=MTGridsDir+'/'+str(M2)+'_'+str(Mbh)+'_'+str(P)
-			OutFileS=JobDir+'S.data'
-			OutFileB=JobDir+'B.data'
-			OutFileSgz=JobDir+'S.data.gz'
-			OutFileBgz=JobDir+'B.data.gz'
-			if (not os.path.isdir(JobDir)) and (not os.path.isfile(OutFileS)) and (not os.path.isfile(OutFileB)) and (not os.path.isfile(OutFileSgz)) and (not os.path.isfile(OutFileBgz)):
-				return M2, Mbh, P #, alpha, beta, system
-	return dum
+	fiducial = fiducialMTseq.LagrangianMTseq(alpha, beta, M2, Mbh, P, system)
+	if fiducial != 1:
+		return dum
+	else:
+		return M2, Mbh, P #, alpha, beta, syste
+	
 
 if __name__ == "__main__":
 # Inputs
 	ncpus 						= int(sys.argv[1])
-	SetupScriptPathsFile 	= sys.argv[2]
+	SetupScriptPathsFile 				= sys.argv[2]
 	alpha 						= float(sys.argv[3])
-	beta 							= float(sys.argv[4])
+	beta 						= float(sys.argv[4])
 	system 						= sys.argv[5]
 
 	execfile(SetupScriptPathsFile,globals())
