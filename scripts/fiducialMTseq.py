@@ -4,39 +4,12 @@ Created on Tue Feb  23 18:20:15 2015
 
 @author: Mads Sørensen
 """
-import numpy, sys, os, odespy
+import numpy, sys, os
 from numpy import where as where
 #import MTseq_npy
 
-#Lagrangian Formulation of Single Mass Transfer sequence
-def orbit_separation(M1, alpha, beta, a, M2low,M2up,dM):
-    # Integrate forward in time, hence mass flows from donor M2 onto accretor.
-    # Alpha is fraction of mass lost from the donor and transferred towards the accretor.
-    # Beta is the fraction of mass captured by the accretor.
-
-    #Given input determine orbital separation    
-    def int_Mdonor(u,M2):
-        # Funciton to integrate over M2, the donor mass
-        a, M1  = u
-        q      = M2/M1
-        dM1dM2 = -alpha*beta
-        dadM2  = -2*a/M2*(alpha*(1-q)+q/2/(1+q)*(1-alpha*beta))
-        return [dadM2, dM1dM2]
-        
-    # Initial conditions
-    u_init = [a,M1]
-    u      = numpy.array([2])    
-    solver = odespy.RK4(int_Mdonor)    
-    solver.set_initial_condition(u_init)
-    N      = int(round(abs(M2up-M2low)/dM))    # Number of points 
-    # Integrate
-    mass_points = numpy.linspace(M2up,M2low,N+1)
-    u, M2       = solver.solve(mass_points)
-    result = numpy.vstack((M2,u[:,0],u[:,1]))
-    return result
-
 def evolve_orbital_period_RLO(alpha, beta, P0, M10, M20, M2):
-    # Analytical solution of a lagrangian binary system of two point masses M1 and M2
+    # Analytical solution of a lagrangian formulation of a binary system of two point masses M1 and M2
     # where alpha and beta are coefficients to describe fractions of mass lost and transfered.
     
     # Input ::
