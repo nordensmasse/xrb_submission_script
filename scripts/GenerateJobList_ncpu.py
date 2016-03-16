@@ -32,7 +32,7 @@ def Add2JobList(SetupScriptPathsFile, alpha, beta, system, M2, Mbh, P, w_single_
 				OutFileSgz=JobDir+'S.data.gz'
 				OutFileBgz=JobDir+'B.data.gz'
 				if (not os.path.isdir(JobDir)) and (not os.path.isfile(OutFileS)) and (not os.path.isfile(OutFileB)) and (not os.path.isfile(OutFileSgz)) and (not os.path.isfile(OutFileBgz)):
-					return M2, Mbh, P, model_number
+					return M2, Mbh, P
 		else:
 			return dum
 	elif w_single_track < 0 and system != 'none' and system != 'None':
