@@ -10,7 +10,7 @@ def log_result(result):
     # result_list is modified only by the main process, not the pool workers.
     result_list.append(result)
 
-def Add2JobList(SetupScriptPathsFile, alpha, beta, system = "", M2, Mbh, P, w_single_track=1):
+def Add2JobList(SetupScriptPathsFile, alpha, beta, system, M2, Mbh, P, w_single_track):
 	#execfile(SetupScriptPathsFile,globals())
 	dum = ""
 	if w_single_track > 0:
@@ -52,6 +52,7 @@ if __name__ == "__main__":
 	w_single_track 		= float(sys.argv[6])
 	if system == 'none' or systen == 'None':
 		system == ""
+	
 	execfile(SetupScriptPathsFile,globals())
 # Initial parameters at onset of RLO.
 	Periods    = [0.6, 0.7, 0.8, 0.9, 1.0, 1.1, ]
