@@ -125,7 +125,6 @@ Remember to also adjust for any other relevant inlist parameters needed.
 2.4] Generating a job list----------------------------------------------------------------
 Go to the folder scripts/ and open GenerateJobList_ncpu.py.
 GenerateJobList_ncpu.py is written in python 2.7 using the anaconda distribution. 
-It also requires the use of the ODE solver package ODESPY.
 Generate the job list locally and not on the cluster. 
 For a long list it can be relative time consuming wrt the work environment of the cluster.
 

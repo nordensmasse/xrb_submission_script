@@ -4,50 +4,29 @@ Created on Tue Feb  23 18:20:15 2015
 
 @author: Mads Sørensen
 """
-import numpy, sys, os, odespy
+import numpy, sys, os
 from numpy import where as where
 #import MTseq_npy
 
-def constant_G():
-#Function transforms gravitational constant G from SI to solar; radii, masses, and Myr.
-    Myr    = 365*24*3600*1e6
-    Rsun  = 6.9551*1e8
-    Msun  = 1.999*1e30
-    G     = 6.67*1e-11*Myr**2*Msun/Rsun**3 # m**3 s**-2 kg**-1
-#    print 'Loaded Gravitational constant G in'
-#    print 'units [Myr**-2 Msun**-1 Rsun**3]'
-    return G
-G = constant_G()
-
-#Lagrangian Formulation of Single Mass Transfer sequence
-def orbit_separation(M1, alpha, beta, a, M2low,M2up,dM):
-    # Integrate forward in time, hence mass flows from donor M2 onto accretor.
-    # Alpha is fraction of mass lost from the donor and transferred towards the accretor.
-    # Beta is the fraction of mass captured by the accretor.
+def evolve_orbital_period_RLO(alpha, beta, P0, M10, M20, M2):
+    # Analytical solution of a lagrangian formulation of a binary system of two point masses M1 and M2
+    # where alpha and beta are coefficients to describe fractions of mass lost and transfered.
     
-    import odespy
+    # Input ::
+    # Alpha ::    Float, the mass fraction lost from the system at the donor
+    # Beta  ::    Float, the mass fraction lost from system at the accretor.
+    # P0    ::    Float, initial orbital period
+    # M10   ::    Float, initial accretor mass
+    # M20   ::    Float, initial donor mass
+    # M2    ::    Array, Float, how M2 evolves.
 
-    #Given input determine orbital separation    
-    def int_Mdonor(u,M2):
-        # Funciton to integrate over M2, the donor mass
-        a, M1  = u
-        q      = M2/M1
-        dM1dM2 = -alpha*beta
-        dadM2  = -2*a/M2*(alpha*(1-q)+q/2/(1+q)*(1-alpha*beta))
-        return [dadM2, dM1dM2]
-        
-    # Initial conditions
-    u_init = [a,M1]
-    u      = numpy.array([2])    
-    solver = odespy.RK4(int_Mdonor)    
-    solver.set_initial_condition(u_init)
-    N      = int(round(abs(M2up-M2low)/dM))    # Number of points 
-    # Integrate
-    mass_points = numpy.linspace(M2up,M2low,N+1)
-    u, M2       = solver.solve(mass_points)
-    result = numpy.vstack((M2,u[:,0],u[:,1]))
-    return result
+    # The unit of P0 dictates the unit of P.
 
+    M0 = M10 + M20
+    M1 = -(1-alpha)*(1-beta)*(M2-M20)+M10
+    M  = M1 + M2
+    P  = P0*(M2/M20)**(3.*(alpha-1)) * (M1/M10)**(3./(beta-1))*(M0/M)**2
+    return P
 
 #The black hole spin
 def BH_spin(Mi,M0):
@@ -86,8 +65,8 @@ class ObservedSystem(object):
 			print self.datafile
 			sys.exit("Obs. data for system ",SystemName," do not exist")
 
-def LagrangianMTseq(alpha, beta, M2, Mbh, P, system):
-	M2 = float(M2)
+def LagrangianMTseq(alpha, beta, M20, Mbh, P, system):
+	M20 = float(M20)
 	Mbh = float(Mbh)
 	P = float(P)
 	
@@ -96,30 +75,16 @@ def LagrangianMTseq(alpha, beta, M2, Mbh, P, system):
 	#Read in system values to compare with
 	b = ObservedSystem(system)
 	Pobs = b.Value['P']
-	#if b.Value['M2'] > 4*b.Error['M2']:
-	#	M2low 	= b.Value['M2']-(Nsigma+2.)*b.Error['M2']
-	#else:
 	M2low 	= 1.0
 
 	# Array with accepted models
 	F_M2       = 0
 	F_M1       = 0
-	F_a        = 0
 	F_spin 	   = 0
-
-	p          	= P/1e6/365.0 									# To Myr
-	dM2        	= 0.01 										# Integration step size
-	a_h  		= ((p/(2.*numpy.pi))**2*G*(Mbh+M2))**(1./3.)     			# $R_{\odot}$
-
-	result     	= orbit_separation(Mbh , 1.0-alpha, 1.0-beta, a_h, M2low, M2, dM2) 	# Bulk integrate
-
-	M2_cal     	= result[0,:] 									# $M_{\odot}$
-	a_cal      	= result[1,:] 									# $R_{\odot}$
-	M1_cal     	= result[2,:] 									# $M_{\odot}$
-		
-	# determine orbital period            
-	omega_cal  	= numpy.sqrt(G*(M1_cal+M2_cal)/a_cal**3)
-	P_cal      	= 2.*numpy.pi/omega_cal*1e6*365.0
+	
+	M2_cal 	= numpy.linspace(M20, M2low, 2001)
+	M1_cal 	= -(1-alpha)*(1-beta)*(M2_cal-M20)+Mbh
+	P_cal 	= evolve_orbital_period_RLO(alpha, beta, P, Mbh, M20, M2_cal)
 
 	# Criteria for interpolation
 	# Avoid extrapolation
@@ -137,12 +102,10 @@ def LagrangianMTseq(alpha, beta, M2, Mbh, P, system):
 	for ip in range(numpy.size(index)):
 		F_M2   	= 0
 		F_M1   	= 0
-		F_a    	= 0
 		F_spin 	= 0
 		a_spin  = 0.					# BH Spin initially					
 		M2sim   = M2_cal[index[ip]]
 		Mbh_sim = M1_cal[index[ip]]                        
-		asim    = a_cal[index[ip]]
 		Macc    = abs(Mbh-Mbh_sim)   	# Rest mass accreted by BH.
 		#print 'Rest mass acrreted', Macc
 		a_spin  = BH_spin(Mbh, Macc) 	# Spin of black hole with initial mass mbh.
