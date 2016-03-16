@@ -35,12 +35,14 @@ def Add2JobList(SetupScriptPathsFile, alpha, beta, system, M2, Mbh, P, w_single_
 					return M2, Mbh, P #, alpha, beta, system
 		else:
 			return dum
-	elif w_single_track < 0:
+	elif w_single_track < 0 and system != 'none' and system != 'None':
 		fiducial = fiducialMTseq.LagrangianMTseq(alpha, beta, M2, Mbh, P, system)
 		if fiducial != 1:
 			return dum
 		else:
 			return M2, Mbh, P
+	else:
+		return M2, Mbh, P
 
 if __name__ == "__main__":
 # Inputs
