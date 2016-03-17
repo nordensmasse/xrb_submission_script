@@ -29,6 +29,7 @@ def replace(file, pattern, subst):
 if __name__ == '__main__':
     Njobs = int(sys.argv[1]) # number of jobs to submit
     SetupScriptPathsFile = sys.argv[2]
+    w_single_track = sys.argv[3]
     execfile(SetupScriptPathsFile,globals())
 
     num_lines = sum(1 for line in open(JobListFile))
@@ -50,7 +51,7 @@ if __name__ == '__main__':
             replace(NewSubmissionScriptFile, "#SBATCH --job-name=DummyJobName", "#SBATCH --job-name="+grid_label+'_'+str(M2)+'_'+str(Mbh)+'_'+str(P))
             replace(NewSubmissionScriptFile, "#SBATCH --error=DummyJobName", "#SBATCH --error="+grid_label+'_'+str(M2)+'_'+str(Mbh)+'_'+str(P))
             replace(NewSubmissionScriptFile, "#SBATCH --output=DummyJobName", "#SBATCH --output="+grid_label+'_'+str(M2)+'_'+str(Mbh)+'_'+str(P))
-            replace(NewSubmissionScriptFile, 'python StartJobRLO.py', 'python '+mesa_runs_path+'/scripts/StartJobRLO.py '+str(M2)+' '+str(Mbh)+' '+str(P)+' '+SetupScriptPathsFile)#+' '+str(alpha)+' '+str(beta)+' '+system)
+            replace(NewSubmissionScriptFile, 'python StartJobRLO.py', 'python '+mesa_runs_path+'/scripts/StartJobRLO.py '+str(M2)+' '+str(Mbh)+' '+str(P)+' '+SetupScriptPathsFile+' '+str(w_single_track))#+' '+str(alpha)+' '+str(beta)+' '+system)
             subprocess.Popen('sbatch Job_'+grid_label+'_'+str(M2)+'_'+str(Mbh)+'_'+str(P)+'.slurm', shell=True).wait()
             os.chdir("../scripts/")
             time.sleep(0.1)
@@ -59,9 +60,8 @@ if __name__ == '__main__':
             replace(NewSubmissionScriptFile, "#SBATCH --job-name=DummyJobName", "#SBATCH --job-name="+grid_label+'_'+str(M2)+'_'+str(Mbh)+'_'+str(P))
             replace(NewSubmissionScriptFile, "#SBATCH --error=DummyJobName", "#SBATCH --error="+grid_label+'_'+str(M2)+'_'+str(Mbh)+'_'+str(P))
             replace(NewSubmissionScriptFile, "#SBATCH --output=DummyJobName", "#SBATCH --output="+grid_label+'_'+str(M2)+'_'+str(Mbh)+'_'+str(P))
-            replace(NewSubmissionScriptFile, 'python StartJobRLO.py', 'python '+mesa_runs_path+'/scripts/StartJobRLO.py '+str(M2)+' '+str(Mbh)+' '+str(P)+' '+SetupScriptPathsFile)#+' '+str(alpha)+' '+str(beta)+' '+system )
+            replace(NewSubmissionScriptFile, 'python StartJobRLO.py', 'python '+mesa_runs_path+'/scripts/StartJobRLO.py '+str(M2)+' '+str(Mbh)+' '+str(P)+' '+SetupScriptPathsFile+' '+str(w_single_track))#+' '+str(alpha)+' '+str(beta)+' '+system )
             subprocess.Popen('chmod u+x ./Job_'+grid_label+'_'+str(M2)+'_'+str(Mbh)+'_'+str(P)+'.slurm', shell=True).wait()
             subprocess.Popen('nohup ./Job_'+grid_label+'_'+str(M2)+'_'+str(Mbh)+'_'+str(P)+'.slurm &> '+str(M2)+'_'+str(Mbh)+'_'+str(P)+'.out &', shell=True).wait()
             os.chdir("../scripts/")
             time.sleep(0.1)
-                     
