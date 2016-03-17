@@ -87,8 +87,8 @@ def SetupOneRLOJob(M2, Mbh, P, w_single_track):
 		subprocess.Popen('mv ./binary_history.data ../'+OutFileB, shell=True).wait()
 		os.chdir("../")
 		subprocess.Popen('rm -rf '+str(M2)+'_'+str(Mbh)+'_'+str(P), shell=True).wait()
-		subprocess.Popen('gzip '+OutFileS, shell=True).wait()
-		subprocess.Popen('gzip '+OutFileB, shell=True).wait()
+		subprocess.Popen('gzip -f '+OutFileS, shell=True).wait()
+		subprocess.Popen('gzip -f '+OutFileB, shell=True).wait()
 		os.chdir(mesa_runs_path+'/scripts')
 
 
@@ -111,24 +111,19 @@ def SetupOneRLOJob(M2, Mbh, P, w_single_track):
 		subprocess.Popen('mv ./binary_history.data ../'+OutFileB, shell=True).wait()
 		os.chdir("../")
 		subprocess.Popen('rm -rf '+str(M2)+'_'+str(Mbh)+'_'+str(P), shell=True).wait()
-		subprocess.Popen('gzip '+OutFileS, shell=True).wait()
-		subprocess.Popen('gzip '+OutFileB, shell=True).wait()
+		subprocess.Popen('gzip -f '+OutFileS, shell=True).wait()
+		subprocess.Popen('gzip -f '+OutFileB, shell=True).wait()
 		os.chdir(mesa_runs_path+'/scripts')
 
 		SetupOneRLOJob=1
 		return SetupOneRLOJob
-	
-	
 
 if __name__ == '__main__':
 	M2                      = float(sys.argv[1])
 	Mbh                     = float(sys.argv[2])
 	P                       = float(sys.argv[3])
 	SetupScriptPathsFile    = sys.argv[4]
-	w_single_track 		= sys.argv[4]
-#   	alpha                   = float(sys.argv[5])
-#   	beta                    = float(sys.argv[6])
-#	system                  = sys.argv[7]
+	w_single_track 		= float(sys.argv[5])
 	
 	execfile(SetupScriptPathsFile, globals())
 
