@@ -36,12 +36,8 @@ if __name__ == '__main__':
     for i in range(0,min(Njobs, num_lines)):
         f = open(JobListFile,"r")
         lines = f.readlines()
-        (M2, Mbh, P) =  lines[0].split()
+        (M2, Mbh, P) =  lines[i].split()
         #(M2, Mbh, P, alpha, beta, system) =  lines[0].split()
-        f.close()
-        f = open(JobListFile,"w")
-        for line in lines[1:]:
-            f.write(line)
 
         grid_label = string.split(ExecutableDir,"/executables/")[1]
         NewSubmissionScriptFile = mesa_runs_path+'/job_logs/Job_'+grid_label+'_'+str(M2)+'_'+str(Mbh)+'_'+str(P)+'.slurm'
@@ -65,3 +61,4 @@ if __name__ == '__main__':
             subprocess.Popen('nohup ./Job_'+grid_label+'_'+str(M2)+'_'+str(Mbh)+'_'+str(P)+'.slurm &> '+str(M2)+'_'+str(Mbh)+'_'+str(P)+'.out &', shell=True).wait()
             os.chdir("../scripts/")
             time.sleep(0.1)
+    f.close()
