@@ -33,8 +33,8 @@ if __name__ == '__main__':
     execfile(SetupScriptPathsFile,globals())
 
     num_lines = sum(1 for line in open(JobListFile))
+    f = open(JobListFile,"r")
     for i in range(0,min(Njobs, num_lines)):
-        f = open(JobListFile,"r")
         lines = f.readlines()
         (M2, Mbh, P) =  lines[i].split()
         #(M2, Mbh, P, alpha, beta, system) =  lines[0].split()
