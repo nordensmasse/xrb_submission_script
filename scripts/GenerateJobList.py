@@ -13,19 +13,24 @@ def log_result(result):
 def Add2JobList(SetupScriptPathsFile, alpha, beta, system, M2, Mbh, P, w_single_track):
 	#execfile(SetupScriptPathsFile,globals())
 	dum = ""
+
 	if w_single_track > 0:
+
 		#Single track files exists.
-		SingleTrackFile = SingleGridsDir+'/'+str(M2)+'/LOGS/history.data'
+		SingleGridsDirectory = '/Users/MS/mesa_runs/SINGLEgrids/Z0.006'
+		SingleTrackFile = SingleGridsDirectory+'/'+str(M2)+'/LOGS/history.data'
 		if os.path.isfile(SingleTrackFile):
 			model_number, star_age, star_mass, log10_R = numpy.loadtxt(SingleTrackFile,skiprows=6,usecols=(0,1,2,37),unpack=True)
 			StarRadius = 10.**log10_R * u.Rsun
 			fiducial = 1
 			if system != "":
-				fiducial = fiducialMTseq.LagrangianMTseq(alpha, beta, M2, Mbh, P, system)
+				fiducial = analyticMTseq.LagrangianMTseq(alpha, beta, M2, Mbh, P, system)
+
 			if fiducial != 1:
 				return dum
 			RLORadius = roche_lobe(star_mass*u.Msun,float(Mbh)*u.Msun)*period_to_separation(float(P)*u.day,star_mass*u.Msun,float(Mbh)*u.Msun)
 			if (RLORadius < StarRadius).any() and (RLORadius[0] > StarRadius[0]):
+				return M2, Mbh, P
 				JobDir=MTGridsDir+'/'+str(M2)+'_'+str(Mbh)+'_'+str(P)
 				OutFileS=JobDir+'S.data'
 				OutFileB=JobDir+'B.data'
@@ -33,10 +38,12 @@ def Add2JobList(SetupScriptPathsFile, alpha, beta, system, M2, Mbh, P, w_single_
 				OutFileBgz=JobDir+'B.data.gz'
 				if (not os.path.isdir(JobDir)) and (not os.path.isfile(OutFileS)) and (not os.path.isfile(OutFileB)) and (not os.path.isfile(OutFileSgz)) and (not os.path.isfile(OutFileBgz)):
 					return M2, Mbh, P
+			else:
+				return dum
 		else:
 			return dum
 	elif w_single_track < 0 and system != 'none' and system != 'None':
-		fiducial = fiducialMTseq.LagrangianMTseq(alpha, beta, M2, Mbh, P, system)
+		fiducial = analyticMTseq.LagrangianMTseq(alpha, beta, M2, Mbh, P, system)
 		if fiducial != 1:
 			return dum
 		else:
